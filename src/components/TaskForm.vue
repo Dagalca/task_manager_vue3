@@ -1,20 +1,23 @@
 <template>
   <v-container class="container">
+
+    <!-- Title for the Task Manager -->
+    <h1>Task Manager Decoupled Drupal/Vue3</h1>
     <!-- Title changes based on whether it's editing or creating a new task -->
     <h1>{{ taskId ? 'Edit Task' : 'Create Task' }}</h1>
     <v-form ref="form" v-model="valid" @submit.prevent="submit">
       <!-- Input field for task title -->
-      <v-text-field v-model="task.title" label="Title" :rules="requiredRules" required></v-text-field>
+      <v-text-field clearable label="Title" variant="outlined" v-model="task.title" :rules="requiredRules" required></v-text-field>
       <!-- Text area for task description -->
-      <v-textarea v-model="task.field_description" label="Description" :rules="requiredRules"></v-textarea>
+      <v-textarea clearable label="Description" variant="outlined" v-model="task.field_description"  :rules="requiredRules"></v-textarea>
 
       <!-- Date picker for due date -->
       <vuepic-datepicker class="duedate" v-model="task.field_due_date" label="Due Date" format="yyyy-MM-dd"></vuepic-datepicker>
 
       <!-- Dropdown selector for task priority -->
-      <v-select v-model="task.field_priority" :items="priorities" label="Priority" :rules="requiredRules"></v-select>
+      <v-select clearable label="Priority" variant="outlined" v-model="task.field_priority" :items="priorities"  :rules="requiredRules"></v-select>
       <!-- Dropdown selector for task status -->
-      <v-select v-model="task.field_status" :items="statuses" label="Status" :rules="requiredRules"></v-select>
+      <v-select clearable label="Status" variant="outlined"  v-model="task.field_status" :items="statuses" :rules="requiredRules"></v-select>
       <!-- Submit button, text changes based on context -->
       <v-btn color="primary" type="submit">{{ taskId ? 'Update' : 'Create' }}</v-btn>
       <v-btn class="button-back" color="success" @click="backHome">back</v-btn>

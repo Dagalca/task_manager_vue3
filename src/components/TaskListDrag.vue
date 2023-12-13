@@ -22,9 +22,9 @@
             <!-- List for pending tasks -->
             <v-list id="pending-tasks-list">
               <!-- Draggable list for tasks -->
-              <vue-draggable-next v-model="pendingTasks" group="tasks" @end="onDrop">
+              <vue-draggable-next v-model="pendingTasks" group="tasks" >
                 <!-- Iterating over each task -->
-                <v-list-item class="task-item" v-for="task in pendingTasks" :key="task.id">
+                <v-list-item v-for="task in pendingTasks" :key="task.id" :data-id="task.id">
                   <!-- Draggable item area -->
                   <div class="drag-item">
                     <!-- Task details -->
@@ -37,8 +37,8 @@
                       <v-col cols="12" class="task-description"><i>{{ task.attributes.field_description.value }}</i></v-col>
                       <!-- Task priority and due date -->
                       <v-col cols="12" class="task-priority-due">
-                        <span class="font-weight-bold">{{ task.attributes.field_priority.toUpperCase() }}</span>
-                        <span class="due-date">{{ formatDate(task.attributes.field_due_date) }}</span>
+                        <span class="font-weight-bold">Priority: {{ task.attributes.field_priority.toUpperCase() }}</span>
+                        <span class="due-date">Due date: {{ formatDate(task.attributes.field_due_date) }}</span>
                       </v-col>
                     </v-row>
                   </div>
@@ -65,9 +65,9 @@
             <!-- List for in-progress tasks -->
             <v-list id="in-progress-tasks-list">
               <!-- Draggable list for tasks -->
-              <vue-draggable-next v-model="inProgressTasks" group="tasks" @end="onDrop">
+              <vue-draggable-next v-model="inProgressTasks" group="tasks" >
                 <!-- Iterating over each task -->
-                <v-list-item class="task-item" v-for="task in inProgressTasks" :key="task.id">
+                <v-list-item v-for="task in inProgressTasks" :key="task.id" :data-id="task.id">
                   <!-- Draggable item area -->
                   <div class="drag-item">
                     <!-- Task details -->
@@ -80,8 +80,8 @@
                       <v-col cols="12" class="task-description"><i>{{ task.attributes.field_description.value }}</i></v-col>
                       <!-- Task priority and due date -->
                       <v-col cols="12" class="task-priority-due">
-                        <span class="font-weight-bold">{{ task.attributes.field_priority.toUpperCase() }}</span>
-                        <span class="due-date">{{ formatDate(task.attributes.field_due_date) }}</span>
+                        <span class="font-weight-bold">Priority: {{ task.attributes.field_priority.toUpperCase() }}</span>
+                        <span class="due-date">Due Date: {{ formatDate(task.attributes.field_due_date) }}</span>
                       </v-col>
                     </v-row>
                   </div>
@@ -109,10 +109,12 @@
             <!-- List for completed tasks -->
             <v-list id="completed-tasks-list">
               <!-- Draggable list for tasks -->
-              <vue-draggable-next v-model="completedTasks" group="tasks" @end="onDrop">
+              <vue-draggable-next v-model="completedTasks" group="tasks">
                 <!-- Iterating over each task -->
-                <v-list-item class="task-item" v-for="task in completedTasks" :key="task.id">
-                  <!-- Draggable item area -->
+
+                  <v-list-item v-for="task in completedTasks" :key="task.id" :data-id="task.id">
+                    <!-- Contenido del item -->
+                  <!-- Draggable item area <v-list id="pending-tasks-list">-->
                   <div class="drag-item">
                     <!-- Task details -->
                     <v-row class="task-details">
@@ -124,8 +126,8 @@
                       <v-col cols="12" class="task-description"><i>{{ task.attributes.field_description.value }}</i></v-col>
                       <!-- Task priority and due date -->
                       <v-col cols="12" class="task-priority-due">
-                        <span class="font-weight-bold">{{ task.attributes.field_priority.toUpperCase() }}</span>
-                        <span class="due-date">{{ formatDate(task.attributes.field_due_date) }}</span>
+                        <span class="font-weight-bold">Priority: {{ task.attributes.field_priority.toUpperCase() }}</span>
+                        <span class="due-date">Due Date: {{ formatDate(task.attributes.field_due_date) }}</span>
                       </v-col>
                     </v-row>
                   </div>
@@ -146,7 +148,6 @@
 </template>
 
 <script>
-// Importing necessary components from Vue and Vuetify
 import { defineComponent } from 'vue';
 import {
   VContainer, VRow, VCol, VCard, VCardTitle, VCardText, VList,
@@ -155,68 +156,47 @@ import {
 import { VueDraggableNext } from "vue-draggable-next";
 
 export default defineComponent({
-  name: 'TaskListDrag', // Component name
+  name: 'TaskListDrag',
   components: {
-    // Registering components used in this Vue component
-    VueDraggableNext,
-    VContainer,
-    VRow,
-    VCol,
-    VCard,
-    VCardTitle,
-    VCardText,
-    VList,
-    VListItem,
-    VListItemAction,
-    VBtn
+    VueDraggableNext, VContainer, VRow, VCol, VCard, VCardTitle, VCardText,
+    VList, VListItem, VListItemAction, VBtn
   },
-
   data() {
     return {
-      // Initializing data properties
-      tasks: { data: [] }, // Stores all tasks
-      pendingTasks: [],    // Stores tasks with 'Pending' status
-      inProgressTasks: [], // Stores tasks with 'In Progress' status
-      completedTasks: []   // Stores tasks with 'Completed' status
+      tasks: { data: [] },
+      pendingTasks: [],
+      inProgressTasks: [],
+      completedTasks: []
     };
   },
-
   mounted() {
-    // Fetch tasks when component is mounted
     this.fetchTasks();
   },
   methods: {
     async fetchTasks() {
-      // Async method to fetch tasks from the server
       try {
         const response = await this.$http.get('http://to-do-list.ddev.site/jsonapi/node/Task/');
         this.tasks = response.data.data.map(task => ({
           id: task.id,
           attributes: task.attributes
         }));
-
-        // Filter tasks based on their status
-        this.pendingTasks = this.tasks.filter(task => task.attributes.field_status === 'Pending');
-        this.inProgressTasks = this.tasks.filter(task => task.attributes.field_status === 'In Progress');
-        this.completedTasks = this.tasks.filter(task => task.attributes.field_status === 'Completed');
-
-        // Logging loaded tasks for debugging
-        console.log('Tasks Loaded debugging:', this.tasks);
+        this.classifyTasks();
       } catch (error) {
         console.error(error);
       }
     },
+    classifyTasks() {
+      this.pendingTasks = this.tasks.filter(task => task.attributes.field_status === 'Pending');
+      this.inProgressTasks = this.tasks.filter(task => task.attributes.field_status === 'In Progress');
+      this.completedTasks = this.tasks.filter(task => task.attributes.field_status === 'Completed');
+    },
     createTask() {
-      // Navigate to the task creation page
       this.$router.push({ path: '/task' });
     },
-
     editTask(task) {
-      // Navigate to the task editing page with the task's id
       this.$router.push({ name: 'editTask', params: { id: task.id } });
     },
     deleteTask(taskId) {
-      // Method to delete a task
       if (confirm("Are you sure you want to delete this task?")) {
         this.$http.delete(`http://to-do-list.ddev.site/jsonapi/node/Task/${taskId}`)
             .then(() => {
@@ -228,7 +208,6 @@ export default defineComponent({
       }
     },
     formatDate(date) {
-      // Method to format date strings
       if (!date) return '';
       const d = new Date(date);
       let month = '' + (d.getMonth() + 1);
@@ -238,34 +217,36 @@ export default defineComponent({
       if (day.length < 2) day = '0' + day;
       return [year, month, day].join('-');
     },
-    onDrop(event) {
-      // Method to handle drag-and-drop task updating
-      let movedTaskId = event.item.id;
-      let newStatus;
+    updateTaskStatuses(tasks, newStatus) {
+      tasks.forEach(async task => {
+        if (task.attributes.field_status !== newStatus) {
+          task.attributes.field_status = newStatus;
+          await this.updateTaskOnServer(task);
+        }
+      });
+    },
+    async updateTaskOnServer(task) {
+      try {
+        const response = await this.$http.patch(`http://to-do-list.ddev.site/jsonapi/node/Task/${task.id}`, {
+          data: {
+            type: 'node--task',
+            id: task.id,
+            attributes: {
+              field_status: task.attributes.field_status
+            }
+          }
+        });
 
-      // Determine new status based on drop location
-      switch(event.to.id) {
-        case 'pending-tasks-list':
-          newStatus = 'Pending';
-          break;
-        case 'in-progress-tasks-list':
-          newStatus = 'In Progress';
-          break;
-        case 'completed-tasks-list':
-          newStatus = 'Completed';
-          break;
-        default:
-          return; // Do nothing if the drop target is unrecognized
-      }
-
-      // Find and update the task in tasks.data
-      const taskIndex = this.tasks.data.findIndex(task => task.id === movedTaskId);
-      if (taskIndex !== -1) {
-        this.tasks.data[taskIndex].attributes.field_status = newStatus;
+        if (response.status === 200) {
+          console.log('Tarea actualizada con éxito');
+        } else {
+          console.error('Error al actualizar la tarea');
+        }
+      } catch (error) {
+        console.error('Error al actualizar la tarea en el servidor:', error);
       }
     },
     countTasks(category) {
-      // Method to count tasks based on their category
       if (category === 'pending') {
         return this.pendingTasks.length;
       } else if (category === 'inProgress') {
@@ -275,6 +256,26 @@ export default defineComponent({
       }
       return 0;
     },
+  },
+  watch: {
+    pendingTasks: {
+      deep: true,
+      handler(newList) {
+        this.updateTaskStatuses(newList, 'Pending');
+      }
+    },
+    inProgressTasks: {
+      deep: true,
+      handler(newList) {
+        this.updateTaskStatuses(newList, 'In Progress');
+      }
+    },
+    completedTasks: {
+      deep: true,
+      handler(newList) {
+        this.updateTaskStatuses(newList, 'Completed');
+      }
+    }
   }
 });
 </script>
